@@ -423,8 +423,324 @@ int csllClear( CSLList *l, int (*freeDat)(void *)){
 ** cmp(a, b) == 0, se a == b;
 ** cmp(a, b) < 0, se a < b.
 ---------------------------------------------------------------------------*/
-CSLList *csllContatOrdNew( CSLList *l1, CSLList *l2, int (*cmp)(void *, void *)){
+CSLList *csllConcatOrdNew( CSLList *l1, CSLList *l2, int (*cmp)(void *, void *)){
+    SLNode *cur1, *cur2, *last, *newnode;
+    CSLList *l3;
+    int stat;
+    if(l1 != NULL && l2 != NULL){
+        l3 = (CSLList *)malloc(sizeof(CSLList));
+        if(l3 != NULL){
+            l3->first = NULL;
+            l3->cur = NULL;
+            if(l1->first != NULL && l2->first != NULL){
+                last = NULL;
+                cur1 = l1->first;
+                cur2 = l2->first;
+                stat = cmp(cur1->data, cur2->data);
+                newnode = (SLNode *)malloc(sizeof(SLNode));
+                if(newnode != NULL){
+                    if(stat <= 0){
+                        newnode->data = cur1->data;
+                        cur1 = cur1->next;
+                    }else{
+                        newnode->data = cur2->data;
+                        cur2 = cur2->next;
+                    }
+                    newnode->next = newnode;
+                    last = newnode;
+                    l3->first = newnode;
+                    while(cur1->next != l1->first && cur2->next != l2->first){
+                        stat = cmp(cur1->data, cur2->data);
+                        newnode = (SLNode *)malloc(sizeof(SLNode));
+                        if(newnode == NULL){
+                            cur1 = l3->first;
+                            while(cur1->next != l3->first){
+                                cur2 = cur1;
+                                cur1 = cur1->next;
+                                free(cur2);
+                            }
+                            free(cur1);
+                            free(l3);
+                            return NULL;
+                        }
+                        if(stat <= 0){
+                            newnode->data = cur1->data;
+                            cur1 = cur1->next;
+                        }else{
+                            newnode->data = cur2->data;
+                            cur2 = cur2->next;
+                        }
+                        newnode->next = l3->first;
+                        last->next = newnode;
+                        last = newnode;
+                    }
+                    stat = cmp(cur1->data, cur2->data);
+                    if(cur1->next == l1->first){
+                        while(stat > 0 && cur2->next != l2->first){
+                            newnode = (SLNode *)malloc(sizeof(SLNode));
+                            if(newnode == NULL){
+                                cur1 = l3->first;
+                                while(cur1->next != l3->first){
+                                    cur2 = cur1;
+                                    cur1 = cur1->next;
+                                    free(cur2);
+                                }
+                                free(cur1);
+                                free(l3);
+                                return NULL;
+                            }
+                            newnode->data = cur2->data;
+                            newnode->next = l3->first;
+                            last->next = newnode;
+                            last = newnode;
+                            cur2 = cur2->next;
+                            stat = cmp(cur1->data, cur2->data);
+                        }
 
+                        newnode = (SLNode *)malloc(sizeof(SLNode));
+                        if(newnode == NULL){
+                            cur1 = l3->first;
+                            while(cur1->next != l3->first){
+                                cur2 = cur1;
+                                cur1 = cur1->next;
+                                free(cur2);
+                            }
+                            free(cur1);
+                            free(l3);
+                            return NULL;
+                        }
+                        if(stat <= 0){
+                            newnode->data = cur1->data;
+                            newnode->next = l3->first;
+                            last->next = newnode;
+                            last = newnode;
+                            while(cur2->next != l2->first){
+                                newnode = (SLNode *)malloc(sizeof(SLNode));
+                                if(newnode == NULL){
+                                    cur1 = l3->first;
+                                    while(cur1->next != l3->first){
+                                        cur2 = cur1;
+                                        cur1 = cur1->next;
+                                        free(cur2);
+                                    }
+                                    free(cur1);
+                                    free(l3);
+                                    return NULL;
+                                }
+                                newnode->data = cur2->data;
+                                newnode->next = l3->first;
+                                last->next = newnode;
+                                last = newnode;
+                                cur2 = cur2->next;
+                            }
+                            newnode = (SLNode *)malloc(sizeof(SLNode));
+                            if(newnode == NULL){
+                                cur1 = l3->first;
+                                while(cur1->next != l3->first){
+                                    cur2 = cur1;
+                                    cur1 = cur1->next;
+                                    free(cur2);
+                                }
+                                free(cur1);
+                                free(l3);
+                                //csllFree(l3);
+                                return NULL;
+                            }
+                            newnode->data = cur2->data;
+                            newnode->next = l3->first;
+                            last->next = newnode;
+                        }else{
+                            newnode->data = cur2->data;
+                            newnode->next = l3->first;
+                            last->next = newnode;
+                            last = newnode;
+                            newnode = (SLNode *)malloc(sizeof(SLNode));
+                            if(newnode == NULL){
+                                cur1 = l3->first;
+                                while(cur1->next != l3->first){
+                                    cur2 = cur1;
+                                    cur1 = cur1->next;
+                                    free(cur2);
+                                }
+                                free(cur1);
+                                free(l3);
+                                //csllFree(l3);
+                                return NULL;
+                            }
+                            newnode->data = cur1->data;
+                            newnode->next = l3->first;
+                            last->next = newnode;
+                        }
+                    }else{
+                        while(stat < 0 && cur1->next != l1->first){
+                            newnode = (SLNode *)malloc(sizeof(SLNode));
+                            if(newnode == NULL){
+                                cur1 = l3->first;
+                                while(cur1->next != l3->first){
+                                    cur2 = cur1;
+                                    cur1 = cur1->next;
+                                    free(cur2);
+                                }
+                                free(cur1);
+                                free(l3);
+                                return NULL;
+                            }
+                            newnode->data = cur1->data;
+                            newnode->next = l3->first;
+                            last->next = newnode;
+                            last = newnode;
+                            cur1 = cur1->next;
+                            stat = cmp(cur1->data, cur2->data);
+                        }
+                        newnode = (SLNode *)malloc(sizeof(SLNode));
+                        if(newnode == NULL){
+                            cur1 = l3->first;
+                            while(cur1->next != l3->first){
+                                cur2 = cur1;
+                                cur1 = cur1->next;
+                                free(cur2);
+                            }
+                            free(cur1);
+                            free(l3);
+                            return NULL;
+                        }
+                        if(stat >= 0){
+                            newnode->data = cur2->data;
+                            newnode->next = l3->first;
+                            last->next = newnode;
+                            last = newnode;
+                            while(cur1->next != l1->first){
+                                newnode = (SLNode *)malloc(sizeof(SLNode));
+                                if(newnode == NULL){
+                                    cur1 = l3->first;
+                                    while(cur1->next != l3->first){
+                                        cur2 = cur1;
+                                        cur1 = cur1->next;
+                                        free(cur2);
+                                    }
+                                    free(cur1);
+                                    free(l3);
+                                    return NULL;
+                                }
+                                newnode->data = cur1->data;
+                                newnode->next = l3->first;
+                                last->next = newnode;
+                                last = newnode;
+                                cur1 = cur1->next;
+                            }
+                            newnode = (SLNode *)malloc(sizeof(SLNode));
+                            if(newnode == NULL){
+                                cur1 = l3->first;
+                                while(cur1->next != l3->first){
+                                    cur2 = cur1;
+                                    cur1 = cur1->next;
+                                    free(cur2);
+                                }
+                                free(cur1);
+                                free(l3);
+                                //csllFree(l3);
+                                return NULL;
+                            }
+                            newnode->data = cur1->data;
+                            newnode->next = l3->first;
+                            last->next = newnode;
+                        }else{
+                            newnode->data = cur1->data;
+                            newnode->next = l3->first;
+                            last->next = newnode;
+                            last = newnode;
+                            newnode = (SLNode *)malloc(sizeof(SLNode));
+                            if(newnode == NULL){
+                                cur1 = l3->first;
+                                while(cur1->next != l3->first){
+                                    cur2 = cur1;
+                                    cur1 = cur1->next;
+                                    free(cur2);
+                                }
+                                free(cur1);
+                                free(l3);
+                                //csllFree(l3);
+                                return NULL;
+                            }
+                            newnode->data = cur2->data;
+                            newnode->next = l3->first;
+                            last->next = newnode;
+                        }
+                    }
+                }else{
+                    free(l3);
+                    return NULL;
+                }
+            }else{
+                if(l1->first != NULL){
+                    cur1 = l1->first;
+                    newnode = (SLNode *)malloc(sizeof(SLNode));
+                    if(newnode != NULL){
+                        newnode->data = cur1->data;
+                        newnode->next = newnode;
+                        l3->first = newnode;
+                        last = newnode;
+                        cur1 = cur1->next;
+                        while(cur1 != l1->first){
+                            newnode = (SLNode *)malloc(sizeof(SLNode));
+                            if(newnode == NULL){
+                                cur1 = l3->first;
+                                while(cur1->next != l3->first){
+                                    cur2 = cur1;
+                                    cur1 = cur1->next;
+                                    free(cur2);
+                                }
+                                free(cur1);
+                                free(l3);
+                                return NULL;
+                            }
+                            newnode->data = cur1->data;
+                            newnode->next = l3->first;
+                            last->next = newnode;
+                            last = newnode;
+                            cur1 = cur1->next;
+                        }
+                    }else{
+                        free(l3);
+                        return NULL;
+                    }
+                }else if(l2->first != NULL){
+                    cur2 = l2->first;
+                    newnode = (SLNode *)malloc(sizeof(SLNode));
+                    if(newnode != NULL){
+                        newnode->data = cur2->data;
+                        newnode->next = newnode;
+                        l3->first = newnode;
+                        last = newnode;
+                        cur2 = cur2->next;
+                        while(cur2 != l2->first){
+                            newnode = (SLNode *)malloc(sizeof(SLNode));
+                            if(newnode == NULL){
+                                cur1 = l3->first;
+                                while(cur1->next != l3->first){
+                                    cur2 = cur1;
+                                    cur1 = cur1->next;
+                                    free(cur2);
+                                }
+                                free(cur1);
+                                free(l3);
+                                return NULL;
+                            }
+                            newnode->data = cur2->data;
+                            newnode->next = l3->first;
+                            last->next = newnode;
+                            last = newnode;
+                            cur2 = cur2->next;
+                        }
+                    }else{
+                        free(l3);
+                        return NULL;
+                    }
+                }
+            }
+            return l3;
+        }
+    }
     return NULL;
 }
 
@@ -440,18 +756,21 @@ CSLList *csllContatOrdNew( CSLList *l1, CSLList *l2, int (*cmp)(void *, void *))
 ** cmp(a, b) == 0, se a == b;
 ** cmp(a, b) < 0, se a < b.
 ---------------------------------------------------------------------------*/
-CSLList *csllContatOrd( CSLList *l1, CSLList *l2, int (*cmp)(void *, void *)){
-    SLNode *cur1, *cur2, *prev;
+CSLList *csllConcatOrd( CSLList *l1, CSLList *l2, int (*cmp)(void *, void *)){
+    SLNode *cur1, *cur2, *prev, *first;
     int stat;
     if(l1 != NULL && l2 != NULL){
         if(l1->first != NULL && l2->first != NULL){
+            prev = NULL;
             cur1 = l1->first;
             cur2 = l2->first;
             stat = cmp(cur1->data, cur2->data);
             if(stat <= 0){
+                first = l1->first;
                 prev = cur1;
                 cur1 = cur1->next;
             }else{
+                first = l2->first;
                 prev = cur2;
                 cur2 = cur2->next;
             }
@@ -468,41 +787,46 @@ CSLList *csllContatOrd( CSLList *l1, CSLList *l2, int (*cmp)(void *, void *)){
                 }
             }
             stat = cmp(cur1->data, cur2->data);
-            if(cur1->next != l1->first){
+
+            if(cur1->next == l1->first){
                 while(stat > 0 && cur2->next != l2->first){
+                    prev->next = cur2;
+                    prev = cur2;
                     cur2 = cur2->next;
                     stat = cmp(cur1->data, cur2->data);
                 }
                 if(stat <= 0){
+                    prev->next = cur2;
                     cur1->next = cur2;
                     while(cur2->next != l2->first){
                         cur2 = cur2->next;
                     }
-                    cur2->next = prev;
+                    cur2->next = first;
                 }else{
                     cur2->next = cur1;
-                    cur1->next = prev;
+                    cur1->next = first;
                 }
             }else{
                 while(stat < 0 && cur1->next != l1->first){
+                    prev->next = cur1;
+                    prev = cur1;
                     cur1 = cur1->next;
                     stat = cmp(cur1->data, cur2->data);
                 }
                 if(stat >= 0){
+                    prev->next = cur2;
                     cur2->next = cur1;
                     while(cur1->next != l1->first){
                         cur1 = cur1->next;
                     }
-                    cur1->next = prev;
+                    cur1->next = first;
                 }else{
                     cur1->next = cur2;
-                    cur2->next = prev;
+                    cur2->next = first;
                 }
             }
 
-            if(prev != l1->first){
-                l1->first = l2->first;
-            }
+            l1->first = first;
             l2->first = NULL;
             l2->cur = NULL;
 
@@ -536,32 +860,29 @@ int csllContido( CSLList *l1, CSLList *l2, int (*cmp)(void *, void *)){
             cur1 = l1->first;
             cur2 = l2->first;
             stat = cmp(cur1->data, cur2->data);
-            cur1 = cur1->next;
             cur2 = cur2->next;
-            while(stat != TRUE && cur1 != l1->first && cur2 != l2->first){
-                stat = cmp(cur1->data, cur2->data);
-                cur1 = cur1->next;
-                cur2 = cur2->next;
-            }
-            while(stat != FALSE && cur1 != l1->first && cur2 != l2->first){
-                stat = cmp(cur1->data, cur2->data);
-                cur1 = cur1->next;
-                cur2 = cur2->next;
-            }
-            if(cur1 != l1->first ){
-                stat = FALSE;
-            }
-            return stat;
-            while(stat != FALSE && cur1->next != l1->first){
-                stat = cmp(cur1->data, cur2->data);
-                cur2 = cur2->next;
-                while(stat == TRUE && cur2 != l2->first){
-                    stat = cmp(cur1->data, cur2->data);
-                    cur2 = cur2->next;
+            while(cur2 != l2->first){
+                if(stat == TRUE){
+                    cur1 = cur1->next;
+                    if(cur1 != l1->first){
+                        stat = cmp(cur1->data, cur2->data);
+                    }
+                    while(stat != FALSE && cur1->next != l1->first && cur2->next != l2->first){
+                        cur1 = cur1->next;
+                        cur2 = cur2->next;
+                        stat = cmp(cur1->data, cur2->data);
+                    }
+                    if(cur1->next == l1->first && stat == TRUE){
+                        return TRUE;
+                    }
                 }
-                cur2 = l2->first;
+                cur1 = l1->first;
+                stat = cmp(cur1->data, cur2->data);
+                cur2 = cur2->next;
             }
-            return stat;
+            if(cur1->next == l1->first){
+                return stat;
+            }
         }
     }
     return FALSE;
@@ -597,6 +918,8 @@ int csllElemContido( CSLList *l1, CSLList *l2, int (*cmp)(void *, void *)){
                 cur2 = l2->first;
             }
             return stat;
+        }else if(l1->first == NULL){
+            return TRUE;
         }
     }
     return FALSE;
@@ -614,32 +937,32 @@ int csllElemContido( CSLList *l1, CSLList *l2, int (*cmp)(void *, void *)){
 **
 ** assumindo TRUE == 1 e FALSE == 0.
 ---------------------------------------------------------------------------*/
-CSLList *csllUniao( CSLList *l1, CSLList *l2, int (*cmp)(void *, void *)){
+/*CSLList *csllUniao( CSLList *l1, CSLList *l2, int (*cmp)(void *, void *)){
     CSLList *l3;
-    SLNode *cur1, *cur2, *cur3, *newnode;
+    SLNode *cur1, *cur2, *newnode;
     int stat;
     if(l1 != NULL && l2 != NULL){
         l3 = (CSLList *)malloc(sizeof(CSLList));
         if(l3 != NULL){
+            l3->first = NULL;
+            l3->cur = NULL;
             if(l1->first != NULL && l2->first != NULL){
                 cur1 = l1->first;
-                cur2 = l2->first;
-                stat = cmp(cur1->data, cur2->data);
                 newnode = (SLNode *)malloc(sizeof(SLNode));
                 if(newnode != NULL){
                     newnode->data = cur1->data;
                     newnode->next = newnode;
                     l3->first = newnode;
-                    cur3 = newnode;
+                    cur2 = newnode;
                     cur1 = cur1->next;
                     while(cur1 != l1->first){
                         newnode = (SLNode *)malloc(sizeof(SLNode));
                         if(newnode == NULL){
                             newnode = l3->first;
                             while(newnode->next != l3->first){
-                                cur3= newnode;
+                                cur2= newnode;
                                 newnode = newnode->next;
-                                free(cur3);
+                                free(cur2);
                             }
                             free(newnode);
                             free(l3);
@@ -647,27 +970,27 @@ CSLList *csllUniao( CSLList *l1, CSLList *l2, int (*cmp)(void *, void *)){
                         }
                         newnode->data = cur1->data;
                         newnode->next = l3->first;
-                        cur3->next = newnode;
-                        cur3 = newnode;
+                        cur2->next = newnode;
+                        cur2 = newnode;
                         cur1 = cur1->next;
                     }
-                    cur3 = l3->first;
+                    cur2 = l3->first;
                     cur1 = l2->first;
                     while(cur1->next != l2->first){
-                        stat = cmp(cur3->data, cur1->data);
-                        cur3 = cur3->next;
-                        while(stat != TRUE && cur3 != l3->first){
-                            stat = cmp(cur3->data, cur1->data);
-                            cur3 = cur3->next;
+                        stat = cmp(cur2->data, cur1->data);
+                        cur2 = cur2->next;
+                        while(stat != TRUE && cur2 != l3->first){
+                            stat = cmp(cur2->data, cur1->data);
+                            cur2 = cur2->next;
                         }
                         if(stat == FALSE){
                             newnode = (SLNode *)malloc(sizeof(SLNode));
                             if(newnode == NULL){
                                 newnode = l3->first;
                                 while(newnode->next != l3->first){
-                                    cur3 = newnode;
+                                    cur2 = newnode;
                                     newnode = newnode->next;
-                                    free(cur3);
+                                    free(cur2);
                                 }
                                 free(newnode);
                                 free(l3);
@@ -675,25 +998,25 @@ CSLList *csllUniao( CSLList *l1, CSLList *l2, int (*cmp)(void *, void *)){
                             }
                             newnode->data = cur1->data;
                             newnode->next = l3->first;
-                            cur3->next = newnode;
+                            cur2->next = newnode;
                         }
                         cur1 = cur1->next;
-                        cur3 = l3->first;
+                        cur2 = l3->first;
                     }
-                    stat = cmp(cur3->data, cur1->data);
-                    cur3 = cur3->next;
-                    while(stat != TRUE && cur3 != l3->first){
-                        stat = cmp(cur3->data, cur1->data);
-                        cur3 = cur3->next;
+                    stat = cmp(cur2->data, cur1->data);
+                    cur2 = cur2->next;
+                    while(stat != TRUE && cur2 != l3->first){
+                        stat = cmp(cur2->data, cur1->data);
+                        cur2 = cur2->next;
                     }
                     if(stat == FALSE){
                         newnode = (SLNode *)malloc(sizeof(SLNode));
                         if(newnode == NULL){
                             newnode = l3->first;
                             while(newnode->next != l3->first){
-                                cur3 = newnode;
+                                cur2 = newnode;
                                 newnode = newnode->next;
-                                free(cur3);
+                                free(cur2);
                             }
                             free(newnode);
                             free(l3);
@@ -701,11 +1024,221 @@ CSLList *csllUniao( CSLList *l1, CSLList *l2, int (*cmp)(void *, void *)){
                         }
                         newnode->data = cur1->data;
                         newnode->next = l3->first;
-                        cur3->next = newnode;
+                        cur2->next = newnode;
                     }
-                    return l3;
+                }else{
+                    free(l3);
+                    return NULL;
+                }
+            }else{
+                if(l1->first != NULL){
+                    cur1 = l1->first;
+                    newnode = (SLNode *)malloc(sizeof(SLNode));
+                    if(newnode != NULL){
+                        newnode->data = cur1->data;
+                        newnode->next = newnode;
+                        l3->first = newnode;
+                        cur2 = newnode;
+                        cur1 = cur1->next;
+                        while(cur1 != l1->first){
+                            newnode = (SLNode *)malloc(sizeof(SLNode));
+                            if(newnode == NULL){
+                                newnode = l3->first;
+                                while(newnode->next != l3->first){
+                                    cur2= newnode;
+                                    newnode = newnode->next;
+                                    free(cur2);
+                                }
+                                free(newnode);
+                                free(l3);
+                                return NULL;
+                            }
+                            newnode->data = cur1->data;
+                            newnode->next = l3->first;
+                            cur2->next = newnode;
+                            cur2 = newnode;
+                            cur1 = cur1->next;
+                        }
+                    }else{
+                        free(l3);
+                        return NULL;
+                    }
+                }else{
+                    if(l2->first != NULL){
+                        cur1 = l2->first;
+                        newnode = (SLNode *)malloc(sizeof(SLNode));
+                        if(newnode != NULL){
+                            newnode->data = cur1->data;
+                            newnode->next = newnode;
+                            l3->first = newnode;
+                            cur2 = newnode;
+                            cur1 = cur1->next;
+                            while(cur1 != l1->first){
+                                newnode = (SLNode *)malloc(sizeof(SLNode));
+                                if(newnode == NULL){
+                                    newnode = l3->first;
+                                    while(newnode->next != l3->first){
+                                        cur2= newnode;
+                                        newnode = newnode->next;
+                                        free(cur2);
+                                    }
+                                    free(newnode);
+                                    free(l3);
+                                    return NULL;
+                                }
+                                newnode->data = cur1->data;
+                                newnode->next = l3->first;
+                                cur2->next = newnode;
+                                cur2 = newnode;
+                                cur1 = cur1->next;
+                            }
+                        }else{
+                            free(l3);
+                            return NULL;
+                        }
+                    }
                 }
             }
+            return l3;
+        }
+    }
+    return NULL;
+}*/
+
+CSLList *csllUniao( CSLList *l1, CSLList *l2, int (*cmp)(void *, void *)){
+    CSLList *l3;
+    SLNode *cur1, *cur2, *newnode;
+    int stat;
+    if(l1 != NULL && l2 != NULL){
+        l3 = (CSLList *)malloc(sizeof(CSLList));
+        if(l3 != NULL){
+            l3->first = NULL;
+            l3->cur = NULL;
+            if(l1->first != NULL){
+                cur1 = l1->first;
+                newnode = (SLNode *)malloc(sizeof(SLNode));
+                if(newnode != NULL){
+                    newnode->data = cur1->data;
+                    newnode->next = newnode;
+                    l3->first = newnode;
+                    cur2 = newnode;
+                    cur1 = cur1->next;
+                    while(cur1 != l1->first){
+                        newnode = (SLNode *)malloc(sizeof(SLNode));
+                        if(newnode == NULL){
+                            newnode = l3->first;
+                            while(newnode->next != l3->first){
+                                cur2= newnode;
+                                newnode = newnode->next;
+                                free(cur2);
+                            }
+                            free(newnode);
+                            free(l3);
+                            return NULL;
+                        }
+                        newnode->data = cur1->data;
+                        newnode->next = l3->first;
+                        cur2->next = newnode;
+                        cur2 = newnode;
+                        cur1 = cur1->next;
+                    }
+                }else{
+                    free(l3);
+                    return NULL;
+                }
+            }
+            if(l2->first != NULL){
+                newnode = cur2;
+                cur1 = l1->first;
+                cur2 = l2->first;
+                if(cur1 != NULL){
+                    while(cur2->next != l2->first){
+                        stat = cmp(cur1->data, cur2->data);
+                        cur1 = cur1->next;
+                        while(stat != TRUE && cur1 != l1->first){
+                            stat = cmp(cur1->data, cur2->data);
+                            cur1 = cur1->next;
+                        }
+                        if(stat == FALSE){
+                            cur1 = newnode;
+                            newnode = (SLNode *)malloc(sizeof(SLNode));
+                            if(newnode == NULL){
+                                newnode = l3->first;
+                                while(newnode->next != l3->first){
+                                    cur1 = newnode;
+                                    newnode = newnode->next;
+                                    free(cur1);
+                                }
+                                free(newnode);
+                                free(l3);
+                                return NULL;
+                            }
+                            newnode->data = cur2->data;
+                            newnode->next = l3->first;
+                            cur1->next = newnode;
+                        }
+                        cur2 = cur2->next;
+                        cur1 = l1->first;
+                    }
+                    stat = cmp(cur1->data, cur2->data);
+                    cur1 = cur1->next;
+                    while(stat != TRUE && cur1 != l1->first){
+                        stat = cmp(cur1->data, cur2->data);
+                        cur1 = cur1->next;
+                    }
+                    if(stat == FALSE){
+                        cur1 = newnode;
+                        newnode = (SLNode *)malloc(sizeof(SLNode));
+                        if(newnode == NULL){
+                            newnode = l3->first;
+                            while(newnode->next != l3->first){
+                                cur2 = newnode;
+                                newnode = newnode->next;
+                                free(cur2);
+                            }
+                            free(newnode);
+                            free(l3);
+                            return NULL;
+                        }
+                        newnode->data = cur2->data;
+                        newnode->next = l3->first;
+                        cur1->next = newnode;
+                    }
+                }else{
+                    cur1 = l2->first;
+                    newnode = (SLNode *)malloc(sizeof(SLNode));
+                    if(newnode != NULL){
+                        newnode->data = cur1->data;
+                        newnode->next = newnode;
+                        l3->first = newnode;
+                        cur2 = newnode;
+                        cur1 = cur1->next;
+                        while(cur1 != l2->first){
+                            newnode = (SLNode *)malloc(sizeof(SLNode));
+                            if(newnode == NULL){
+                                newnode = l3->first;
+                                while(newnode->next != l3->first){
+                                    cur2= newnode;
+                                    newnode = newnode->next;
+                                    free(cur2);
+                                }
+                                free(newnode);
+                                free(l3);
+                                return NULL;
+                            }
+                            newnode->data = cur1->data;
+                            newnode->next = l3->first;
+                            cur2->next = newnode;
+                            cur2 = newnode;
+                            cur1 = cur1->next;
+                        }
+                    }else{
+                        free(l3);
+                        return NULL;
+                    }
+                }
+            }
+            return l3;
         }
     }
     return NULL;
@@ -724,8 +1257,105 @@ CSLList *csllUniao( CSLList *l1, CSLList *l2, int (*cmp)(void *, void *)){
 ** assumindo TRUE == 1 e FALSE == 0.
 ---------------------------------------------------------------------------*/
 CSLList *csllIntersecao( CSLList *l1, CSLList *l2, int (*cmp)(void *, void *)){
-
+    CSLList *l3;
+    SLNode *cur1, *cur2, *cur3, *newnode;
+    int stat;
+    if(l1 != NULL && l2 != NULL){
+        l3 = (CSLList *)malloc(sizeof(CSLList));
+        if(l3 != NULL){
+            l3->first = NULL;
+            l3->cur = NULL;
+            if(l1->first != NULL && l2->first != NULL){
+                cur3 = NULL;
+                cur1 = l1->first;
+                cur2 = l2->first;
+                while(cur1->next != l1->first){
+                    stat = cmp(cur1->data, cur2->data);
+                    cur2 = cur2->next;
+                    while(stat != TRUE && cur2 != l2->first){
+                        stat = cmp(cur1->data, cur2->data);
+                        cur2 = cur2->next;
+                    }
+                    if(stat == TRUE){
+                        newnode = (SLNode *)malloc(sizeof(SLNode));
+                        if(newnode == NULL){
+                            if(l3->first != NULL){
+                                newnode = l3->first;
+                                while(newnode->next != l3->first){
+                                    cur3 = newnode;
+                                    newnode = newnode->next;
+                                    free(cur3);
+                                }
+                                free(newnode);
+                            }
+                            free(l3);
+                            return NULL;
+                        }
+                        newnode->data = cur1->data;
+                        if(l3->first == NULL){
+                            l3->first = newnode;
+                            cur3 = l3->first;
+                        }
+                        newnode->next = l3->first;
+                        cur3->next = newnode;
+                        cur3 = newnode;
+                    }
+                    cur2 = l2->first;
+                    cur1 = cur1->next;
+                }
+                stat = cmp(cur1->data, cur2->data);
+                cur2 = cur2->next;
+                while(stat != TRUE && cur2 != l2->first){
+                    stat = cmp(cur1->data, cur2->data);
+                    cur2 = cur2->next;
+                }
+                if(stat == TRUE){
+                    newnode = (SLNode *)malloc(sizeof(SLNode));
+                    if(newnode == NULL){
+                        if(l3->first != NULL){
+                            newnode = l3->first;
+                            while(newnode->next != l3->first){
+                                cur3 = newnode;
+                                newnode = newnode->next;
+                                free(cur3);
+                            }
+                            free(newnode);
+                        }
+                        free(l3);
+                        return NULL;
+                    }
+                    newnode->data = cur1->data;
+                    if(l3->first == NULL){
+                        l3->first = newnode;
+                        cur3 = l3->first;
+                    }
+                    newnode->next = l3->first;
+                    cur3->next = newnode;
+                }
+            }
+            return l3;
+        }
+    }
     return NULL;
+}
+
+/*------------------------------------------------------------------------
+** Função que da free em uma lista sem se importar em dar free nos seus elementos
+---------------------------------------------------------------------------*/
+void csllFree(CSLList *l){
+    SLNode *cur1, *cur2;
+    if(l != NULL){
+        if(l->first != NULL){
+            cur1 = l->first;
+            while(cur1->next != l->first){
+                cur2 = cur1;
+                cur1 = cur1->next;
+                free(cur2);
+            }
+            free(cur1);
+        }
+        free(l);
+    }
 }
 
 #endif

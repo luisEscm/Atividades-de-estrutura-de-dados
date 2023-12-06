@@ -116,7 +116,7 @@ int csllClear( CSLList *l, int (*freeDat)(void *));
 ** cmp(a, b) == 0, se a == b;
 ** cmp(a, b) < 0, se a < b.
 ---------------------------------------------------------------------------*/
-CSLList *csllContatOrdNew( CSLList *l1, CSLList *l2, int (*cmp)(void *, void *));
+CSLList *csllConcatOrdNew( CSLList *l1, CSLList *l2, int (*cmp)(void *, void *));
 
 /*------------------------------------------------------------------------
 ** Contena duas CSLList ordenadas e retorna uma uma das CSLList com todos os elementos mantendo
@@ -130,7 +130,7 @@ CSLList *csllContatOrdNew( CSLList *l1, CSLList *l2, int (*cmp)(void *, void *))
 ** cmp(a, b) == 0, se a == b;
 ** cmp(a, b) < 0, se a < b.
 ---------------------------------------------------------------------------*/
-CSLList *csllContatOrd( CSLList *l1, CSLList *l2, int (*cmp)(void *, void *));
+CSLList *csllConcatOrd( CSLList *l1, CSLList *l2, int (*cmp)(void *, void *));
 
 /*------------------------------------------------------------------------
 ** Verifica se a CSLList l1 está contido na CSLList l2, se sim retorna TRUE caso contrario retorna FALSE,
